@@ -23,7 +23,7 @@ class Remittances extends Component {
   makeRemittance(id, query) {
     const config = {
       method: "post",
-      url: `${process.env.REACT_APP_LOCAL_URL}/admin/${id}/remittance?query=${query}`,
+      url: `${process.env.REACT_APP_PROD_URL}/admin/${id}/remittance?query=${query}`,
       headers: {
         Authorization: `Bearer ${this.TOKEN}`,
       },

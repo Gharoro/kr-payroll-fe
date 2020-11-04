@@ -16,7 +16,7 @@ export default class LandingPage extends Component {
     e.preventDefault();
     const config = {
       method: "post",
-      url: `${process.env.REACT_APP_LOCAL_URL}/login`,
+      url: `${process.env.REACT_APP_PROD_URL}/login`,
 
       data: this.state,
     };

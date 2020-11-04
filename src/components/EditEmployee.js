@@ -32,7 +32,7 @@ class EditEmployee extends Component {
       });
     }
     axios
-      .get(`${process.env.REACT_APP_LOCAL_URL}/employee/${this.id}`, {
+      .get(`${process.env.REACT_APP_PROD_URL}/employee/${this.id}`, {
         headers: {
           Authorization: `Bearer ${this.TOKEN}`,
         },

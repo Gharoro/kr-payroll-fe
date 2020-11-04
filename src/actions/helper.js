@@ -17,7 +17,7 @@ export function makeAsyncAction(actionSet, url, method, data = null) {
     dispatch({ type: actionSet.BEGIN });
 
     return axios({
-      baseURL: process.env.REACT_APP_LOCAL_URL,
+      baseURL: process.env.REACT_APP_PROD_URL,
       url: url,
       method: method,
       data: data,

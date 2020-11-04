@@ -1,38 +1,182 @@
-.App {
-  text-align: center;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+  background: #e5e5e5;
+}
+.auth-form {
+  margin-top: 100px;
+}
+.auth-form form {
+  padding: 19px;
+}
+.auth-form p {
+  color: #424546;
+}
+.label span {
+  color: red;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.feather {
+  width: 16px;
+  height: 16px;
+  vertical-align: text-bottom;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+/*
+ * Sidebar
+ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100; /* Behind the navbar */
+  padding: 48px 0 0; /* Height of navbar */
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    top: 5rem;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  padding-top: 0.5rem;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+  .sidebar-sticky {
+    position: -webkit-sticky;
+    position: sticky;
   }
-  to {
-    transform: rotate(360deg);
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+}
+
+.sidebar .nav-link .feather {
+  margin-right: 4px;
+  color: #999;
+}
+
+.sidebar .nav-link.active {
+  color: #007bff;
+}
+
+.sidebar .nav-link:hover .feather,
+.sidebar .nav-link.active .feather {
+  color: inherit;
+}
+
+.sidebar-heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/*
+ * Navbar
+ */
+
+.navbar-brand {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  font-size: 1rem;
+  background-color: rgba(0, 0, 0, 0.25);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
+}
+
+.navbar .navbar-toggler {
+  top: 0.25rem;
+  right: 1rem;
+}
+
+.navbar .form-control {
+  padding: 0.75rem 1rem;
+  border-width: 0;
+  border-radius: 0;
+}
+
+.form-control-dark {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.form-control-dark:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+.add-employee-form input {
+  background: #f0eeee !important;
+  border-radius: 8px !important;
+  height: 50px;
+}
+.add-employee-form label span {
+  color: red;
+}
+.add-employee-form .form-row select {
+  background: #f0eeee !important;
+  border-radius: 8px !important;
+  height: 50px;
+}
+.form-control:focus {
+  border-color: #f0eeee;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+td {
+  padding-top: 30px !important;
+  padding-bottom: 30px !important;
+}
+td a {
+  text-decoration: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px;
+  height: fit-content;
+  width: fit-content;
+  color: #424546;
+}
+td a:hover {
+  text-decoration: none;
+  color: #424546;
+  background: #fff;
+}
+.earnings,
+.deductions {
+  background-color: #e5e5e5;
+}
+.employee-card {
+  margin-left: 280px;
+}
+@media only screen and (max-width: 768px) {
+  .auth-form {
+    margin-top: 50%;
+  }
+  .employees-table {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+  td a {
+    background-color: #fff;
+  }
+  .employee-card {
+    margin-left: 0px;
   }
 }

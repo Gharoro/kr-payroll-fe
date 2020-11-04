@@ -1,19 +1,45 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import Header from "./nav/Header";
 import Sidebar from "./nav/Sidebar";
+import isLoggedIn from "../utils";
+import { allEmployees, generatePayslip } from "../actions";
 
-export default class Payslips extends Component {
+class Payslips extends Component {
   constructor(props) {
     super(props);
     this.state = {
       display: "none",
+      month: "",
+      employee_id: 0,
     };
     this.callGeneratePayslip = this.callGeneratePayslip.bind(this);
   }
+  numberWithCommas(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  componentDidMount() {
+    if (!isLoggedIn()) {
+      this.props.history.push({
+        pathname: "/",
+      });
+    }
+    this.props.allEmployees();
+  }
   callGeneratePayslip() {
-    this.setState({ display: "block" });
+    this.props
+      .generatePayslip(this.state.month, this.state.employee_id)
+      .then((res) => {
+        if (res.success) {
+          this.setState({ display: "block" });
+        } else {
+          alert("An error occured!");
+        }
+      });
   }
   render() {
+    const employees = this.props.employees.get("data");
+    const payslip = this.props.response.get("payslip");
     return (
       <div>
         <Header />
@@ -26,45 +52,72 @@ export default class Payslips extends Component {
                 <h1 class="h2">Payslips</h1>
               </div>
               <div className="col-md-8 add-employee-form p-3 bg-white rounded">
+                {this.props.error.get("error") ? (
+                  <div
+                    class="alert alert-danger alert-dismissible fade show"
+                    role="alert"
+                  >
+                    <strong>{this.props.error.get("error")}</strong>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="alert"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                ) : (
+                  ""
+                )}
                 <form action="">
                   <div className="form-row">
                     <div className="col-md-4">
-                    <div class="form-group">
-                    <label for="gender" className="font-weight-bold mb-3">
-                      Month
-                    </label>
-                    <select class="form-control" id="gender">
-                      <option selected>
-                        Select month
-                      </option>
-                      <option value="August 2020">
-                        August 2020
-                      </option>
-                      <option value="September 2020">September 2020</option>
-                      <option value="October 2020">October 2020</option>
-                    </select>
-                  </div>
+                      <div class="form-group">
+                        <label for="gender" className="font-weight-bold mb-3">
+                          Month
+                        </label>
+                        <select
+                          class="form-control"
+                          id="month"
+                          onChange={(e) => {
+                            this.setState({ month: e.target.value });
+                          }}
+                        >
+                          <option selected>Select month</option>
+                          <option value="August 2020">August 2020</option>
+                          <option value="September 2020">September 2020</option>
+                          <option value="October 2020">October 2020</option>
+                        </select>
+                      </div>
                     </div>
                     <div className="col-md-6">
-                    <div class="form-group">
-                    <label for="gender" className="font-weight-bold mb-3">
-                      Employees List
-                    </label>
-                    <select class="form-control" id="gender">
-                      <option selected>
-                        Please select employee to generate payslip for
-                      </option>
-                      <option value="1">
-                        Lanre Phillips
-                      </option>
-                      <option value="2">Anita Johnson</option>
-                      <option value="3">Efosa Bright</option>
-                      <option value="4">Samuel Okiki</option>
-                    </select>
-                  </div>
+                      <div class="form-group">
+                        <label for="gender" className="font-weight-bold mb-3">
+                          Employees List
+                        </label>
+                        <select
+                          class="form-control"
+                          id="emplyee"
+                          onChange={(e) => {
+                            this.setState({ employee_id: e.target.value });
+                          }}
+                        >
+                          <option selected>
+                            Please select employee to generate payslip for
+                          </option>
+                          {!employees
+                            ? ""
+                            : employees.map((employee) => (
+                                <option value={employee.get("id")}>
+                                  {employee.get("first_name")}{" "}
+                                  {employee.get("last_name")}
+                                </option>
+                              ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
-               
 
                   <button
                     type="button"
@@ -76,85 +129,129 @@ export default class Payslips extends Component {
                 </form>
               </div>
               {/* Payslip */}
-              <div style={{ display: this.state.display }}>
-                <h2 className="mt-4">
-                  Payslip{" "}
-                  <button className="btn btn-secondary">Send Payslip</button>
-                </h2>
-                <p>March 2020</p>
-              </div>
-              <div
-                className="col-md-8 add-employee-form p-3 mb-3 bg-white"
-                style={{ display: this.state.display }}
-              >
-                <h6 className="font-weight-bolder">Kimberly Ryan</h6>
-                <p>
-                  386, Quiet valley lane, <br /> Victoria Island, Lagos
-                </p>
-                <div className="mt-5">
-                  <h6 className="font-weight-bolder">Lanre Phillips</h6>
-                  <p>Account Manager</p>
-                </div>
+              {!payslip ? (
+                "Loading..."
+              ) : (
+                <React.Fragment>
+                  <div style={{ display: this.state.display }}>
+                    <h2 className="mt-4">
+                      Payslip{" "}
+                      <button className="btn btn-secondary">
+                        Send Payslip
+                      </button>
+                    </h2>
+                    <p>{payslip.get("month")}</p>
+                  </div>
+                  <div
+                    className="col-md-8 add-employee-form p-3 mb-3 bg-white"
+                    style={{ display: this.state.display }}
+                  >
+                    <h6 className="font-weight-bolder">
+                      {this.props.response.get("company_name")}
+                    </h6>
+                    <p>{this.props.response.get("company_address")}</p>
+                    <div className="mt-5">
+                      <h6 className="font-weight-bolder">
+                        {this.props.response.get("employee_first_name")}{" "}
+                        {this.props.response.get("employee_last_name")}
+                      </h6>
+                      <p>{this.props.response.get("employee_job_title")}</p>
+                    </div>
 
-                <div className="row pl-3">
-                  <div className="col-md-6 earnings mr-2">
-                    <h6 className="font-weight-bolder mt-2">Earnings</h6>
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>Basic Salary</p>
-                      <p>N450,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>House Allowance</p>
-                      <p>N50,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>Transportation</p>
-                      <p>N20,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>Others</p>
-                      <p>N10,000</p>
-                    </div>
-                    <hr />
+                    <div className="row pl-3">
+                      <div className="col-md-6 earnings mr-2">
+                        <h6 className="font-weight-bolder mt-2">Earnings</h6>
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
+                          <p>Basic Salary</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(payslip.get("basic_salary"))}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
+                          <p>House Allowance</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(payslip.get("housing"))}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
+                          <p>Transportation</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(
+                              payslip.get("transportation")
+                            )}
+                          </p>
+                        </div>
+                        <hr />
 
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom font-weight-bolder">
-                      <p>Total</p>
-                      <p>N530,000</p>
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom font-weight-bolder">
+                          <p>Total</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(
+                              payslip.get("total_earnings")
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="col-md-5 deductions">
+                        <h6 className="font-weight-bolder mt-2">Deductions</h6>
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>PAYE</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(payslip.get("paye_amount"))}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>Pension</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(
+                              payslip.get("pension_amount")
+                            )}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>NSITF</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(payslip.get("nsitf_amount"))}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>NHF</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(payslip.get("nhf_amount"))}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center  font-weight-bolder">
+                          <p>Total Deductions</p>
+                          <p>
+                            &#8358;
+                            {this.numberWithCommas(
+                              payslip.get("total_deductions")
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <h4 className="mt-2 mr-5">
+                        Net Salary: &#8358;
+                        {this.numberWithCommas(payslip.get("net_salary"))}
+                      </h4>
                     </div>
                   </div>
-                  <div className="col-md-5 deductions">
-                    <h6 className="font-weight-bolder mt-2">Deductions</h6>
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>Tax + V.A.T</p>
-                      <p>N160,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>Pension</p>
-                      <p>N50,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>NSITF</p>
-                      <p>N20,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>NHIF</p>
-                      <p>N10,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center  font-weight-bolder">
-                      <p>Total Deductions</p>
-                      <p>N230,000</p>
-                    </div>
-                  </div>
-                  <h4 className="mt-2 mr-5">Net Salary: N330,000</h4>
-                </div>
-              </div>
+                </React.Fragment>
+              )}
             </main>
           </div>
         </div>
@@ -162,3 +259,18 @@ export default class Payslips extends Component {
     );
   }
 }
+
+export const mapStateToProps = (state) => {
+  return {
+    loading: state.all_employees.get("loading"),
+    error: state.all_employees.get("error"),
+    employees: state.all_employees.get("employees"),
+    /** payslip */
+    error: state.generate_payslip.get("error"),
+    response: state.generate_payslip.get("response"),
+  };
+};
+
+export default connect(mapStateToProps, { allEmployees, generatePayslip })(
+  Payslips
+);

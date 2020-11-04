@@ -1,9 +1,27 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import Header from "./nav/Header";
 import EmployeeSidebar from "./nav/EmployeeSidebar";
+import isLoggedIn from "../utils";
+import { getSalary } from "../actions";
 
-export default class Salary extends Component {
+class Salary extends Component {
+  numberWithCommas(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  componentDidMount() {
+    if (!isLoggedIn()) {
+      this.props.history.push({
+        pathname: "/",
+      });
+    }
+    this.props.getSalary();
+  }
   render() {
+    const { salary } = this.props;
+    sessionStorage.setItem("basic", salary.get("basic_salary"));
+    sessionStorage.setItem("deductions", salary.get("deductions"));
+    sessionStorage.setItem("net", salary.get("net_salary"));
     return (
       <div>
         <Header />
@@ -19,26 +37,30 @@ export default class Salary extends Component {
                 <h1 class="h2">Salary Details</h1>
                 <p>Please find the details of your salary below.</p>
               </div>
-              <div className="col-md-6 add-employee-form p-4 bg-white rounded">
-                <div>
-                  <h6 className="font-weight-bolder">
-                    Full name: Lanre Phillips
-                  </h6>
-                  <p>
-                    <strong>Job Title:</strong> Account Manager
-                  </p>
-                  <hr />
-                  <p>
-                    <strong>Basic Salary:</strong> N450,000
-                  </p>
-                  <p>
-                    <strong>Deductions:</strong> N150,000
-                  </p>
-                  <p>
-                    <strong>Net Salary:</strong> N300,000
-                  </p>
+              {!salary ? (
+                "Loading..."
+              ) : (
+                <div className="col-md-6 add-employee-form p-4 bg-white rounded">
+                  <div>
+                    <p>
+                      <strong>Basic Salary:</strong> &#8358;
+                      {this.numberWithCommas(sessionStorage.getItem("basic"))}
+                    </p>
+                    <hr />
+                    <p>
+                      <strong>Deductions:</strong> &#8358;
+                      {this.numberWithCommas(
+                        sessionStorage.getItem("deductions")
+                      )}
+                    </p>
+                    <hr />
+                    <p>
+                      <strong>Net Salary:</strong> &#8358;
+                      {this.numberWithCommas(sessionStorage.getItem("net"))}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </main>
           </div>
         </div>
@@ -46,3 +68,13 @@ export default class Salary extends Component {
     );
   }
 }
+
+export const mapStateToProps = (state) => {
+  return {
+    loading: state.employee_salary.get("loading"),
+    error: state.employee_salary.get("error"),
+    salary: state.employee_salary.get("salary"),
+  };
+};
+
+export default connect(mapStateToProps, { getSalary })(Salary);

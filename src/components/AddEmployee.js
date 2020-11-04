@@ -1,8 +1,37 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import Header from "./nav/Header";
 import Sidebar from "./nav/Sidebar";
+import isLoggedIn from "../utils";
+import { addEmployee } from "../actions";
 
-export default class AddEmployee extends Component {
+class AddEmployee extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      address: "",
+      gender: "",
+      age: "",
+      job_title: "",
+      department: "",
+    };
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  componentDidMount() {
+    if (!isLoggedIn()) {
+      this.props.history.push({
+        pathname: "/",
+      });
+    }
+  }
+  handleSubmit(e) {
+    e.preventDefault();
+    this.props.addEmployee(this.state);
+  }
   render() {
     return (
       <div>
@@ -16,36 +45,79 @@ export default class AddEmployee extends Component {
                 <h1 class="h2">Add Employee</h1>
               </div>
               <div className="col-md-8 add-employee-form p-5 bg-white rounded">
-                <form action="/admin/dashboard">
+                {this.props.message ? (
+                  <div
+                    class="alert alert-success alert-dismissible fade show"
+                    role="alert"
+                  >
+                    <strong>{this.props.message}</strong>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="alert"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                ) : (
+                  ""
+                )}
+                {this.props.error.get("error") ? (
+                  <div
+                    class="alert alert-danger alert-dismissible fade show"
+                    role="alert"
+                  >
+                    <strong>{this.props.error.get("error")}</strong>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="alert"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                ) : (
+                  ""
+                )}
+
+                <form onSubmit={this.handleSubmit}>
                   <div className="form-row">
                     <div className="col-md-6">
-                    <div class="form-group">
-                    <label for="name">
-                      First name <span>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="name"
-                      required
-                    />
-                  </div>
+                      <div class="form-group">
+                        <label for="name">
+                          First name <span>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="name"
+                          required
+                          onChange={(e) => {
+                            this.setState({ first_name: e.target.value });
+                          }}
+                        />
+                      </div>
                     </div>
                     <div className="col-md-6">
-                    <div class="form-group">
-                    <label for="name">
-                      Last Name <span>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="name"
-                      required
-                    />
-                  </div>
+                      <div class="form-group">
+                        <label for="name">
+                          Last Name <span>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="name"
+                          required
+                          onChange={(e) => {
+                            this.setState({ last_name: e.target.value });
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                 
+
                   <div class="form-group">
                     <label for="email">
                       Email <span>*</span>
@@ -55,6 +127,9 @@ export default class AddEmployee extends Component {
                       class="form-control"
                       id="email"
                       required
+                      onChange={(e) => {
+                        this.setState({ email: e.target.value });
+                      }}
                     />
                   </div>
                   <div class="form-group">
@@ -66,6 +141,9 @@ export default class AddEmployee extends Component {
                       class="form-control"
                       id="phone"
                       required
+                      onChange={(e) => {
+                        this.setState({ phone: e.target.value });
+                      }}
                     />
                   </div>
                   <div class="form-group">
@@ -77,6 +155,9 @@ export default class AddEmployee extends Component {
                       class="form-control"
                       id="address"
                       required
+                      onChange={(e) => {
+                        this.setState({ address: e.target.value });
+                      }}
                     />
                   </div>
                   <div className="form-row">
@@ -85,9 +166,18 @@ export default class AddEmployee extends Component {
                         <label for="gender">
                           Gender <span>*</span>
                         </label>
-                        <select class="form-control" id="gender">
+                        <select
+                          class="form-control"
+                          id="gender"
+                          required
+                          onChange={(e) => {
+                            this.setState({ gender: e.target.value });
+                          }}
+                        >
+                          <option selected>Select gender</option>
                           <option value="male">Male</option>
                           <option value="female">Female</option>
+                          <option value="other">Other</option>
                         </select>
                       </div>
                     </div>
@@ -101,6 +191,9 @@ export default class AddEmployee extends Component {
                           class="form-control"
                           id="name"
                           required
+                          onChange={(e) => {
+                            this.setState({ age: e.target.value });
+                          }}
                         />
                       </div>
                     </div>
@@ -114,6 +207,9 @@ export default class AddEmployee extends Component {
                       class="form-control"
                       id="job_title"
                       required
+                      onChange={(e) => {
+                        this.setState({ job_title: e.target.value });
+                      }}
                     />
                   </div>
                   <div class="form-group">
@@ -125,6 +221,9 @@ export default class AddEmployee extends Component {
                       class="form-control"
                       id="name"
                       required
+                      onChange={(e) => {
+                        this.setState({ department: e.target.value });
+                      }}
                     />
                   </div>
 
@@ -140,3 +239,13 @@ export default class AddEmployee extends Component {
     );
   }
 }
+
+export const mapStateToProps = (state) => {
+  return {
+    loading: state.add_employee.get("loading"),
+    error: state.add_employee.get("error"),
+    message: state.add_employee.get("message"),
+  };
+};
+
+export default connect(mapStateToProps, { addEmployee })(AddEmployee);

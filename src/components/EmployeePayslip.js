@@ -1,19 +1,38 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import Header from "./nav/Header";
 import EmployeeSidebar from "./nav/EmployeeSidebar";
+import isLoggedIn from "../utils";
+import { getPayslip } from "../actions";
 
-export default class EmployeePayslip extends Component {
+class EmployeePayslip extends Component {
   constructor(props) {
     super(props);
     this.state = {
       display: "none",
+      month: "",
     };
     this.showPayslip = this.showPayslip.bind(this);
   }
+
+  componentDidMount() {
+    if (!isLoggedIn()) {
+      this.props.history.push({
+        pathname: "/",
+      });
+    }
+  }
   showPayslip() {
-    this.setState({ display: "block" });
+    this.props.getPayslip(this.state.month).then((res) => {
+      if (res.success) {
+        this.setState({ display: "block" });
+      } else {
+        alert("An error occured!");
+      }
+    });
   }
   render() {
+    const { payslip } = this.props;
     return (
       <div>
         <Header />
@@ -32,14 +51,20 @@ export default class EmployeePayslip extends Component {
                     <label for="month" className="font-weight-bold mb-3">
                       Month
                     </label>
-                    <select class="form-control" id="month">
+                    <select
+                      class="form-control"
+                      id="month"
+                      onChange={(e) => {
+                        this.setState({ month: e.target.value });
+                      }}
+                    >
                       <option selected>
                         Please select month to view payslip
                       </option>
-                      <option value="1">January 2020</option>
-                      <option value="2">February 2020</option>
-                      <option value="3">March 2020</option>
-                      <option value="4">April 2020</option>
+                      <option value="August 2020">August 2020</option>
+                      <option value="September 2020">September 2020</option>
+                      <option value="October 2020">October 2020</option>
+                      <option value="November 2020">November 2020</option>
                     </select>
                   </div>
 
@@ -53,87 +78,119 @@ export default class EmployeePayslip extends Component {
                 </form>
               </div>
               {/* Payslip */}
-              <div style={{ display: this.state.display }}>
-                <h2 className="mt-4">
-                  Payslip{" "}
-                  <button className="btn btn-secondary">
-                    Download Payslip
-                  </button>
-                </h2>
-                <p>March 2020</p>
-              </div>
-              <div
-                className="col-md-8 add-employee-form p-3 mb-3 bg-white"
-                style={{ display: this.state.display }}
-              >
-                <h6 className="font-weight-bolder">Kimberly Ryan</h6>
-                <p>
-                  386, Quiet valley lane, <br /> Victoria Island, Lagos
-                </p>
-                <div className="mt-5">
-                  <h6 className="font-weight-bolder">Lanre Phillips</h6>
-                  <p>Account Manager</p>
-                </div>
+              {!payslip ? (
+                "No payslip found!"
+              ) : (
+                <React.Fragment>
+                  <div style={{ display: this.state.display }}>
+                    <h2 className="mt-4">
+                      Payslip{" "}
+                      <button className="btn btn-secondary">
+                        Download Payslip
+                      </button>
+                    </h2>
+                    <p>{this.state.month}</p>
+                  </div>
+                  <div
+                    className="col-md-8 add-employee-form p-3 mb-3 bg-white"
+                    style={{ display: this.state.display }}
+                  >
+                    <h6 className="font-weight-bolder">Kimberly Ryan</h6>
+                    <p>
+                      386, Quiet valley lane, <br /> Victoria Island, Lagos
+                    </p>
+                    <div className="mt-5">
+                      <h6 className="font-weight-bolder">Lanre Phillips</h6>
+                      <p>Account Manager</p>
+                    </div>
 
-                <div className="row pl-3">
-                  <div className="col-md-6 earnings mr-2">
-                    <h6 className="font-weight-bolder mt-2">Earnings</h6>
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>Basic Salary</p>
-                      <p>N450,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>House Allowance</p>
-                      <p>N50,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>Transportation</p>
-                      <p>N20,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
-                      <p>Others</p>
-                      <p>N10,000</p>
-                    </div>
-                    <hr />
+                    <div className="row pl-3">
+                      <div className="col-md-6 earnings mr-2">
+                        <h6 className="font-weight-bolder mt-2">Earnings</h6>
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
+                          <p>Basic Salary</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("basic_salary")}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
+                          <p>House Allowance</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("housing")}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom">
+                          <p>Transportation</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("transportation")}
+                          </p>
+                        </div>
+                        <hr />
 
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom font-weight-bolder">
-                      <p>Total</p>
-                      <p>N530,000</p>
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom font-weight-bolder">
+                          <p>Total</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("total_earnings")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="col-md-5 deductions">
+                        <h6 className="font-weight-bolder mt-2">Deductions</h6>
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>PAYE</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("paye_amount")}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>Pension</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("pension_amount")}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>NSITF</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("nsitf_amount")}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
+                          <p>NHF</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("nhf_amount")}
+                          </p>
+                        </div>
+                        <hr />
+                        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center  font-weight-bolder">
+                          <p>Total Deductions</p>
+                          <p>
+                            &#8358;
+                            {payslip.get("total_deductions")}
+                          </p>
+                        </div>
+                      </div>
+                      <h4 className="mt-2 mr-5">
+                        {" "}
+                        Net Salary: &#8358;
+                        {payslip.get("net_salary")}
+                      </h4>
                     </div>
                   </div>
-                  <div className="col-md-5 deductions">
-                    <h6 className="font-weight-bolder mt-2">Deductions</h6>
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>Tax + V.A.T</p>
-                      <p>N160,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>Pension</p>
-                      <p>N50,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>NSITF</p>
-                      <p>N20,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center ">
-                      <p>NHIF</p>
-                      <p>N10,000</p>
-                    </div>
-                    <hr />
-                    <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center  font-weight-bolder">
-                      <p>Total Deductions</p>
-                      <p>N230,000</p>
-                    </div>
-                  </div>
-                  <h4 className="mt-2 mr-5">Net Salary: N330,000</h4>
-                </div>
-              </div>
+                </React.Fragment>
+              )}
             </main>
           </div>
         </div>
@@ -141,3 +198,13 @@ export default class EmployeePayslip extends Component {
     );
   }
 }
+
+export const mapStateToProps = (state) => {
+  return {
+    loading: state.employee_payslip.get("loading"),
+    error: state.employee_payslip.get("error"),
+    payslip: state.employee_payslip.get("payslip"),
+  };
+};
+
+export default connect(mapStateToProps, { getPayslip })(EmployeePayslip);

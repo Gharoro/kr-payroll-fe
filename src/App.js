@@ -59,7 +59,7 @@ export default class App extends Component {
           ></Route>
           <Route path={"/employee/salary"} exact component={Salary}></Route>
           <Route
-            path={"/employee/:id/payslips"}
+            path={"/employee/payslips"}
             exact
             component={EmployeePayslip}
           ></Route>

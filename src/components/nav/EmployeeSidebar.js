@@ -35,7 +35,7 @@ export default function EmployeeSidebar(props) {
               className={
                 props.page === "payslip" ? "nav-link active" : "nav-link"
               }
-              href="/employee/1/payslips"
+              href="/employee/payslips"
             >
               <span data-feather="shopping-cart"></span>
               Payslips
